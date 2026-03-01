@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
 Sentinel MCP Server - Simple security scanning MCP server
-Deployable to Dedalus Labs (HTTP/SSE transport)
+Deployable to Dedalus Labs
 """
 
-from mcp.server.fastmcp import FastMCP
+from fastmcp import FastMCP
 
-# Create MCP server with HTTP transport
+# Create FastMCP server
 mcp = FastMCP("Sentinel Security Scanner")
 
 @mcp.tool()
@@ -15,7 +15,7 @@ def scan_url(url: str, scan_type: str = "quick") -> str:
 
     Args:
         url: The URL to scan (e.g., https://example.com)
-        scan_type: Type of scan to perform - either "quick" or "full"
+        scan_type: Type of scan - either "quick" or "full" (default: quick)
     """
 
     findings = [
@@ -62,7 +62,3 @@ def check_headers(url: str) -> str:
 
 Recommendation: Add missing security headers to improve security posture.
 """
-
-if __name__ == "__main__":
-    # Run with uvicorn for HTTP/SSE transport
-    mcp.run()

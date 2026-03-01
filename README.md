@@ -1,6 +1,6 @@
 # Sentinel MCP Server
 
-A simple Model Context Protocol (MCP) server for basic security scanning.
+A simple Model Context Protocol (MCP) server for basic security scanning, built with FastMCP.
 
 ## Features
 
@@ -10,7 +10,7 @@ A simple Model Context Protocol (MCP) server for basic security scanning.
 ## Installation
 
 ```bash
-pip install mcp
+pip install fastmcp
 ```
 
 ## Usage
@@ -20,12 +20,14 @@ pip install mcp
 python server.py
 ```
 
+The server will start on http://localhost:8000 with the MCP endpoint at `/mcp`.
+
 ### Deploy to Dedalus Labs
 
 1. Go to https://www.dedaluslabs.ai/dashboard/servers
 2. Click "Add Server"
 3. Select "From GitHub Repository"
-4. Enter this repository URL
+4. Enter: `https://github.com/Kai856/sentinel-mcp-server`
 5. Deploy!
 
 ## Tools Available
@@ -35,7 +37,7 @@ Performs a quick security scan on a URL.
 
 **Parameters:**
 - `url` (required): The URL to scan
-- `scan_type` (optional): "quick" or "full"
+- `scan_type` (optional): "quick" or "full" (default: "quick")
 
 **Example:**
 ```json
@@ -79,6 +81,16 @@ Checks security headers for a URL.
   ⚠️  Potential CORS misconfiguration
 
 📝 Scan complete! Found 3 potential issues.
+```
+
+## Testing Locally
+
+```bash
+# Start the server
+python server.py
+
+# In another terminal, test the endpoint
+curl http://localhost:8000/mcp
 ```
 
 ## License

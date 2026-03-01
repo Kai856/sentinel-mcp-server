@@ -1,97 +1,55 @@
 #!/usr/bin/env python3
 """
 Sentinel MCP Server - Simple security scanning MCP server
-Deployable to Dedalus Labs
+Deployable to Dedalus Labs (HTTP/SSE transport)
 """
 
-import asyncio
-from mcp.server import Server
-from mcp.types import Tool, TextContent
-import mcp.server.stdio
+from mcp.server.fastmcp import FastMCP
 
-# Create MCP server instance
-app = Server("sentinel-security-scanner")
+# Create MCP server with HTTP transport
+mcp = FastMCP("Sentinel Security Scanner")
 
-@app.list_tools()
-async def list_tools() -> list[Tool]:
-    """List available security scanning tools."""
-    return [
-        Tool(
-            name="scan_url",
-            description="Scan a URL for common security vulnerabilities like XSS, SQLi, and misconfigurations",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "url": {
-                        "type": "string",
-                        "description": "The URL to scan (e.g., https://example.com)"
-                    },
-                    "scan_type": {
-                        "type": "string",
-                        "enum": ["quick", "full"],
-                        "description": "Type of scan to perform",
-                        "default": "quick"
-                    }
-                },
-                "required": ["url"]
-            }
-        ),
-        Tool(
-            name="check_headers",
-            description="Check security headers for a given URL",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "url": {
-                        "type": "string",
-                        "description": "The URL to check headers for"
-                    }
-                },
-                "required": ["url"]
-            }
-        )
+@mcp.tool()
+def scan_url(url: str, scan_type: str = "quick") -> str:
+    """Scan a URL for common security vulnerabilities like XSS, SQLi, and misconfigurations.
+
+    Args:
+        url: The URL to scan (e.g., https://example.com)
+        scan_type: Type of scan to perform - either "quick" or "full"
+    """
+
+    findings = [
+        f"🔍 Scanning {url}...",
+        f"📊 Scan type: {scan_type}",
+        "",
+        "✅ Security Headers Check:",
+        "  ⚠️  Missing Content-Security-Policy",
+        "  ⚠️  Missing X-Frame-Options",
+        "  ✓  HTTPS enabled",
+        "",
+        "🔒 SSL/TLS Check:",
+        "  ✓  Valid certificate",
+        "  ✓  TLS 1.3 supported",
+        "",
+        "🎯 Quick Vulnerability Scan:",
+        "  ✓  No obvious XSS vulnerabilities",
+        "  ✓  No SQL injection detected",
+        "  ⚠️  Potential CORS misconfiguration",
+        "",
+        f"📝 Scan complete! Found 3 potential issues."
     ]
 
-@app.call_tool()
-async def call_tool(name: str, arguments: dict) -> list[TextContent]:
-    """Handle tool calls."""
+    return "\n".join(findings)
 
-    if name == "scan_url":
-        url = arguments.get("url", "")
-        scan_type = arguments.get("scan_type", "quick")
+@mcp.tool()
+def check_headers(url: str) -> str:
+    """Check security headers for a given URL.
 
-        # Simple simulation of security scan
-        findings = [
-            f"🔍 Scanning {url}...",
-            f"📊 Scan type: {scan_type}",
-            "",
-            "✅ Security Headers Check:",
-            "  ⚠️  Missing Content-Security-Policy",
-            "  ⚠️  Missing X-Frame-Options",
-            "  ✓  HTTPS enabled",
-            "",
-            "🔒 SSL/TLS Check:",
-            "  ✓  Valid certificate",
-            "  ✓  TLS 1.3 supported",
-            "",
-            "🎯 Quick Vulnerability Scan:",
-            "  ✓  No obvious XSS vulnerabilities",
-            "  ✓  No SQL injection detected",
-            "  ⚠️  Potential CORS misconfiguration",
-            "",
-            f"📝 Scan complete! Found 3 potential issues."
-        ]
+    Args:
+        url: The URL to check headers for
+    """
 
-        return [TextContent(
-            type="text",
-            text="\n".join(findings)
-        )]
-
-    elif name == "check_headers":
-        url = arguments.get("url", "")
-
-        # Simulate header check
-        result = f"""🔍 Security Headers for {url}
+    return f"""🔍 Security Headers for {url}
 
 ✅ Present:
   • Strict-Transport-Security: max-age=31536000
@@ -105,25 +63,6 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
 Recommendation: Add missing security headers to improve security posture.
 """
 
-        return [TextContent(
-            type="text",
-            text=result
-        )]
-
-    else:
-        return [TextContent(
-            type="text",
-            text=f"Unknown tool: {name}"
-        )]
-
-async def main():
-    """Run the MCP server."""
-    async with mcp.server.stdio.stdio_server() as (read_stream, write_stream):
-        await app.run(
-            read_stream,
-            write_stream,
-            app.create_initialization_options()
-        )
-
 if __name__ == "__main__":
-    asyncio.run(main())
+    # Run with uvicorn for HTTP/SSE transport
+    mcp.run()

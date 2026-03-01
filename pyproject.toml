@@ -5,11 +5,8 @@ description = "Simple security scanning MCP server for Dedalus Labs"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "mcp>=1.0.0",
+    "fastmcp",
 ]
-
-[project.scripts]
-sentinel-mcp-server = "server:main"
 
 [build-system]
 requires = ["hatchling"]
